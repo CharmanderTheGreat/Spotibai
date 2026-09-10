@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="tl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SpotiBai</title>
+  
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    body {
+      background-color: #121212;
+      color: #fff;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+    }
+
+    .app-container {
+      background-color: #181818;
+      padding: 30px 20px;
+      border-radius: 20px;
+      width: 100%;
+      max-width: 520px;
+      text-align: center;
+      box-shadow: 0 15px 35px rgba(0, 0, 0, 0.6);
+    }
+
+    /* Horizontal Cards Row */
+    .cards-wrapper {
+      display: flex;
+      gap: 16px;
+      overflow-x: auto;
+      scroll-snap-type: x mandatory;
+      padding: 10px 10px 20px;
+      margin-bottom: 20px;
+      scrollbar-width: thin;
+      scrollbar-color: #333 transparent;
+    }
+
+    .cards-wrapper::-webkit-scrollbar {
+      height: 6px;
+    }
+
+    .cards-wrapper::-webkit-scrollbar-thumb {
+      background: #333;
+      border-radius: 10px;
+    }
+
+    .song-tab {
+      flex: 0 0 160px;
+      background: #222;
+      border-radius: 14px;
+      padding: 12px;
+      cursor: pointer;
+      scroll-snap-align: center;
+      border: 2px solid transparent;
+      opacity: 0.55;
+      transform: scale(0.92);
+      transition: all 0.3s ease;
+      text-align: left;
+    }
+
+    .song-tab:hover {
+      opacity: 0.85;
+    }
+
+    .song-tab.active {
+      opacity: 1;
+      transform: scale(1.05);
+      background: #262626;
+      border-color: #1db954;
+      box-shadow: 0 8px 24px rgba(29, 185, 84, 0.25);
+    }
+
+    .tab-img {
+      width: 100%;
+      height: 140px;
+      border-radius: 10px;
+      object-fit: cover;
+      margin-bottom: 10px;
+    }
+
+    .tab-title {
+      font-size: 0.9rem;
+      font-weight: bold;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      margin-bottom: 4px;
+    }
+
+    .song-tab.active .tab-title {
+      color: #1db954;
+    }
+
+    .tab-artist {
+      font-size: 0.75rem;
+      color: #b3b3b3;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    /* Player Status & Controls */
+    .now-playing {
+      margin-bottom: 15px;
+    }
+
+    .now-playing h2 {
+      font-size: 1.3rem;
+      margin-bottom: 4px;
+    }
+
+    .now-playing h3 {
+      font-size: 0.9rem;
+      color: #b3b3b3;
+      font-weight: normal;
+    }
+
+    .progress-container {
+      background: #333;
+      border-radius: 6px;
+      cursor: pointer;
+      margin: 15px 0 25px;
+      height: 6px;
+      width: 100%;
+    }
+
+    .progress {
+      background-color: #1db954;
+      border-radius: 6px;
+      height: 100%;
+      width: 0%;
+      transition: width 0.1s linear;
+    }
+
+    .controls {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 25px;
+    }
+
+    .btn {
+      background: none;
+      border: none;
+      color: #b3b3b3;
+      font-size: 1.5rem;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+
+    .btn:hover {
+      color: white;
+    }
+
+    .play-btn {
+      background-color: #1db954;
+      color: black;
+      width: 52px;
+      height: 52px;
+      border-radius: 50%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 1.2rem;
+    }
+
+    .play-btn:hover {
+      transform: scale(1.08);
+      color: black;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="app-container">
+    <!-- Horizontal Scrollable Tabs -->
+    <div class="cards-wrapper" id="cardsWrapper"></div>
+
+    <div class="now-playing">
+      <h2 id="title">Song Title</h2>
+      <h3 id="artist">Artist Name</h3>
+    </div>
+
+    <audio id="audio"></audio>
+
+    <div class="progress-container" id="progress-container">
+      <div class="progress" id="progress"></div>
+    </div>
+
+    <div class="controls">
+      <button id="prev" class="btn">⏮</button>
+      <button id="play" class="btn play-btn">▶</button>
+      <button id="next" class="btn">⏭</button>
+    </div>
+  </div>
+
+  <script>
+    const songs = [
+      { title: 'Wait a Minute', artist: 'Bai', src: 'music/song1.mp3', cover: 'images/cover1.jpg' },
+      { title: 'She Got Her Otin', artist: 'Rene Bai', src: 'music/song2.mp3', cover: 'images/cover2.jpg' },
+      { title: 'Song 3 Title', artist: 'Artist 3', src: 'music/song3.mp3', cover: 'images/cover3.jpg' },
+      { title: 'Song 4 Title', artist: 'Artist 4', src: 'music/song4.mp3', cover: 'images/cover4.jpg' },
+      { title: 'Song 5 Title', artist: 'Artist 5', src: 'music/song5.mp3', cover: 'images/cover5.jpg' },
+      { title: 'Song 6 Title', artist: 'Artist 6', src: 'music/song6.mp3', cover: 'images/cover6.jpg' },
+      { title: 'Song 7 Title', artist: 'Artist 7', src: 'music/song7.mp3', cover: 'images/cover7.jpg' },
+      { title: 'Song 8 Title', artist: 'Artist 8', src: 'music/song8.mp3', cover: 'images/cover8.jpg' },
+      { title: 'Song 9 Title', artist: 'Artist 9', src: 'music/song9.mp3', cover: 'images/cover9.jpg' },
+      { title: 'Song 10 Title', artist: 'Artist 10', src: 'music/song10.mp3', cover: 'images/cover10.jpg' }
+    ];
+
+    const audio = document.getElementById('audio');
+    const playBtn = document.getElementById('play');
+    const prevBtn = document.getElementById('prev');
+    const nextBtn = document.getElementById('next');
+    const title = document.getElementById('title');
+    const artist = document.getElementById('artist');
+    const progress = document.getElementById('progress');
+    const progressContainer = document.getElementById('progress-container');
+    const cardsWrapper = document.getElementById('cardsWrapper');
+
+    let songIndex = 0;
+
+    function renderTabs() {
+      cardsWrapper.innerHTML = '';
+      songs.forEach((song, index) => {
+        const card = document.createElement('div');
+        card.classList.add('song-tab');
+        if (index === songIndex) card.classList.add('active');
+
+        card.innerHTML = `
+          <img src="${song.cover}" class="tab-img" alt="Cover" />
+          <div class="tab-title">${song.title}</div>
+          <div class="tab-artist">${song.artist}</div>
+        `;
+
+        card.addEventListener('click', () => {
+          songIndex = index;
+          loadSong(songs[songIndex]);
+          playSong();
+        });
+
+        cardsWrapper.appendChild(card);
+      });
+    }
+
+    function updateActiveTab() {
+      const cards = document.querySelectorAll('.song-tab');
+      cards.forEach((card, index) => {
+        if (index === songIndex) {
+          card.classList.add('active');
+          card.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+        } else {
+          card.classList.remove('active');
+        }
+      });
+    }
+
+    function loadSong(song) {
+      title.innerText = song.title;
+      artist.innerText = song.artist;
+      audio.src = song.src;
+      updateActiveTab();
+    }
+
+    function playSong() {
+      audio.play();
+      playBtn.innerText = '⏸';
+    }
+
+    function pauseSong() {
+      audio.pause();
+      playBtn.innerText = '▶';
+    }
+
+    playBtn.addEventListener('click', () => {
+      const isPlaying = !audio.paused;
+      isPlaying ? pauseSong() : playSong();
+    });
+
+    function prevSong() {
+      songIndex--;
+      if (songIndex < 0) {
+        songIndex = songs.length - 1;
+      }
+      loadSong(songs[songIndex]);
+      playSong();
+    }
+
+    function nextSong() {
+      songIndex++;
+      if (songIndex > songs.length - 1) {
+        songIndex = 0;
+      }
+      loadSong(songs[songIndex]);
+      playSong();
+    }
+
+    prevBtn.addEventListener('click', prevSong);
+    nextBtn.addEventListener('click', nextSong);
+
+    audio.addEventListener('timeupdate', (e) => {
+      const { duration, currentTime } = e.srcElement;
+      if (duration) {
+        const progressPercent = (currentTime / duration) * 100;
+        progress.style.width = `${progressPercent}%`;
+      }
+    });
+
+    progressContainer.addEventListener('click', (e) => {
+      const width = progressContainer.clientWidth;
+      const clickX = e.offsetX;
+      const duration = audio.duration;
+      audio.currentTime = (clickX / width) * duration;
+    });
+
+    audio.addEventListener('ended', nextSong);
+
+    renderTabs();
+    loadSong(songs[songIndex]);
+  </script>
+
+</body>
+</html>
