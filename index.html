@@ -33,7 +33,6 @@
       box-shadow: 0 15px 35px rgba(0, 0, 0, 0.6);
     }
 
-    /* Horizontal Cards Row */
     .cards-wrapper {
       display: flex;
       gap: 16px;
@@ -109,7 +108,6 @@
       text-overflow: ellipsis;
     }
 
-    /* Player Status & Controls */
     .now-playing {
       margin-bottom: 15px;
     }
@@ -146,44 +144,62 @@
       display: flex;
       justify-content: center;
       align-items: center;
-      gap: 25px;
+      gap: 20px;
     }
 
     .btn {
       background: none;
       border: none;
       color: #b3b3b3;
-      font-size: 1.5rem;
       cursor: pointer;
-      transition: 0.2s;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 6px;
+      transition: all 0.2s;
     }
 
-    .btn:hover {
-      color: white;
+    .btn svg {
+      width: 20px;
+      height: 20px;
+      fill: #b3b3b3;
+      transition: fill 0.2s, filter 0.2s;
+    }
+
+    .btn:hover svg {
+      fill: #fff;
+    }
+
+    .btn.active svg {
+      fill: #1db954;
+      filter: drop-shadow(0 0 6px rgba(29, 185, 84, 0.6));
     }
 
     .play-btn {
       background-color: #1db954;
-      color: black;
       width: 52px;
       height: 52px;
       border-radius: 50%;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      font-size: 1.2rem;
+    }
+
+    .play-btn svg {
+      width: 22px;
+      height: 22px;
+      fill: #000;
     }
 
     .play-btn:hover {
       transform: scale(1.08);
-      color: black;
+    }
+
+    .play-btn:hover svg {
+      fill: #000;
     }
   </style>
 </head>
 <body>
 
   <div class="app-container">
-    <!-- Horizontal Scrollable Tabs -->
     <div class="cards-wrapper" id="cardsWrapper"></div>
 
     <div class="now-playing">
@@ -198,42 +214,60 @@
     </div>
 
     <div class="controls">
-      <button id="prev" class="btn">⏮</button>
-      <button id="play" class="btn play-btn">▶</button>
-      <button id="next" class="btn">⏭</button>
+      <button id="shuffleBtn" class="btn" title="Shuffle">
+        <svg viewBox="0 0 24 24">
+          <path d="M10.59 9.17L5.41 4 4 5.41l5.17 5.17 1.42-1.41zM14.5 4l2.04 2.04L4 18.59 5.41 20 17.96 7.46 20 9.5V4h-5.5zm.33 9.41l-1.41 1.41 3.13 3.13L14.5 20H20v-5.5l-2.04 2.04-3.13-3.13z"/>
+        </svg>
+      </button>
+
+      <button id="prev" class="btn" title="Previous">
+        <svg viewBox="0 0 24 24">
+          <path d="M6 6h2v12H6zm3.5 6l8.5 6V6z"/>
+        </svg>
+      </button>
+
+      <button id="play" class="btn play-btn" title="Play">
+        <svg id="playIcon" viewBox="0 0 24 24">
+          <path d="M8 5v14l11-7z"/>
+        </svg>
+      </button>
+
+      <button id="next" class="btn" title="Next">
+        <svg viewBox="0 0 24 24">
+          <path d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z"/>
+        </svg>
+      </button>
+
+      <button id="loopBtn" class="btn active" title="Repeat List">
+        <svg id="loopIcon" viewBox="0 0 24 24">
+          <path d="M7 7h10v3l4-4-4-4v3H5v6h2V7zm10 10H7v-3l-4 4 4 4v-3h12v-6h-2v4z"/>
+        </svg>
+      </button>
     </div>
   </div>
 
-    <script>
-
+  <script>
     const songs = [
-
       { title: 'Wait a Minute', artist: 'Bai', src: 'music/song1.mp3', cover: 'images/cover1.jpg' },
-
       { title: 'She Got Her Otin', artist: 'Rene Bai', src: 'music/song2.mp3', cover: 'images/cover2.jpg' },
-
       { title: 'Dyosa Bai', artist: 'Mabisa-ya', src: 'music/song3.mp3', cover: 'images/cover3.jpg' },
-
       { title: 'Baha', artist: 'Boss Atan', src: 'music/song4.mp3', cover: 'images/cover4.jpg' },
-
       { title: 'Zeb Bai Na', artist: 'Skusta Bai', src: 'music/song5.mp3', cover: 'images/cover5.jpg' },
-
       { title: 'Driftstar', artist: 'Bai Youth', src: 'music/song6.mp3', cover: 'images/cover6.jpg' },
-
       { title: 'Billie Bai', artist: 'Michael JackBai', src: 'music/song7.mp3', cover: 'images/cover7.jpg' },
-
       { title: 'Seb Bai Nah', artist: 'Baiyot', src: 'music/song8.mp3', cover: 'images/cover8.jpg' },
-
       { title: 'Turon sa Coron', artist: 'Rap Bai', src: 'music/song9.mp3', cover: 'images/cover9.jpg' },
-
       { title: 'Iris', artist: 'Goo Goo Bai', src: 'music/song10.mp3', cover: 'images/cover10.jpg' }
-
     ];
 
     const audio = document.getElementById('audio');
     const playBtn = document.getElementById('play');
+    const playIcon = document.getElementById('playIcon');
     const prevBtn = document.getElementById('prev');
     const nextBtn = document.getElementById('next');
+    const shuffleBtn = document.getElementById('shuffleBtn');
+    const loopBtn = document.getElementById('loopBtn');
+    const loopIcon = document.getElementById('loopIcon');
     const title = document.getElementById('title');
     const artist = document.getElementById('artist');
     const progress = document.getElementById('progress');
@@ -241,6 +275,15 @@
     const cardsWrapper = document.getElementById('cardsWrapper');
 
     let songIndex = 0;
+    let isShuffle = false;
+    let loopState = 1;
+
+    const icons = {
+      play: '<path d="M8 5v14l11-7z"/>',
+      pause: '<path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>',
+      loopAll: '<path d="M7 7h10v3l4-4-4-4v3H5v6h2V7zm10 10H7v-3l-4 4 4 4v-3h12v-6h-2v4z"/>',
+      loopOne: '<path d="M7 7h10v3l4-4-4-4v3H5v6h2V7zm10 10H7v-3l-4 4 4 4v-3h12v-6h-2v4z"/><path d="M13 15V9h-1l-2 1v1h1.5v4H13z"/>'
+    };
 
     function renderTabs() {
       cardsWrapper.innerHTML = '';
@@ -286,12 +329,12 @@
 
     function playSong() {
       audio.play();
-      playBtn.innerText = '⏸';
+      playIcon.innerHTML = icons.pause;
     }
 
     function pauseSong() {
       audio.pause();
-      playBtn.innerText = '▶';
+      playIcon.innerHTML = icons.play;
     }
 
     playBtn.addEventListener('click', () => {
@@ -299,19 +342,42 @@
       isPlaying ? pauseSong() : playSong();
     });
 
+    function getRandomIndex() {
+      let randomIndex = Math.floor(Math.random() * songs.length);
+      if (songs.length > 1) {
+        while (randomIndex === songIndex) {
+          randomIndex = Math.floor(Math.random() * songs.length);
+        }
+      }
+      return randomIndex;
+    }
+
     function prevSong() {
-      songIndex--;
-      if (songIndex < 0) {
-        songIndex = songs.length - 1;
+      if (isShuffle) {
+        songIndex = getRandomIndex();
+      } else {
+        songIndex--;
+        if (songIndex < 0) {
+          songIndex = songs.length - 1;
+        }
       }
       loadSong(songs[songIndex]);
       playSong();
     }
 
     function nextSong() {
-      songIndex++;
-      if (songIndex > songs.length - 1) {
-        songIndex = 0;
+      if (isShuffle) {
+        songIndex = getRandomIndex();
+      } else {
+        songIndex++;
+        if (songIndex > songs.length - 1) {
+          if (loopState === 0) {
+            pauseSong();
+            audio.currentTime = 0;
+            return;
+          }
+          songIndex = 0;
+        }
       }
       loadSong(songs[songIndex]);
       playSong();
@@ -319,6 +385,29 @@
 
     prevBtn.addEventListener('click', prevSong);
     nextBtn.addEventListener('click', nextSong);
+
+    shuffleBtn.addEventListener('click', () => {
+      isShuffle = !isShuffle;
+      shuffleBtn.classList.toggle('active', isShuffle);
+    });
+
+    loopBtn.addEventListener('click', () => {
+      loopState = (loopState + 1) % 3;
+
+      if (loopState === 0) {
+        loopIcon.innerHTML = icons.loopAll;
+        loopBtn.classList.remove('active');
+        loopBtn.title = 'Repeat Off';
+      } else if (loopState === 1) {
+        loopIcon.innerHTML = icons.loopAll;
+        loopBtn.classList.add('active');
+        loopBtn.title = 'Repeat List';
+      } else if (loopState === 2) {
+        loopIcon.innerHTML = icons.loopOne;
+        loopBtn.classList.add('active');
+        loopBtn.title = 'Repeat Song';
+      }
+    });
 
     audio.addEventListener('timeupdate', (e) => {
       const { duration, currentTime } = e.srcElement;
@@ -335,7 +424,14 @@
       audio.currentTime = (clickX / width) * duration;
     });
 
-    audio.addEventListener('ended', nextSong);
+    audio.addEventListener('ended', () => {
+      if (loopState === 2) {
+        audio.currentTime = 0;
+        playSong();
+      } else {
+        nextSong();
+      }
+    });
 
     renderTabs();
     loadSong(songs[songIndex]);
